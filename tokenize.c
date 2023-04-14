@@ -13,9 +13,9 @@ char **tokenize(char *s, char *delims)
 {
 	int size = 10;
 	int len = 0;
-	const char *default_delims = " \t";
+	char *default_delims = " \t";
 	char *token = NULL;
-	char **tokens = malloc(10 * sizeof(char *));
+	char **tokens = malloc(size * sizeof(char *));
 
 	if (tokens == NULL)
 		return (NULL);
@@ -28,6 +28,12 @@ char **tokenize(char *s, char *delims)
 	while (token)
 	{
 		/* TO_DO: Realloc if tokens is full */
+		if (len >= size)
+		{
+			tokens = realloc(tokens, size * 2 * sizeof(char *));
+			size *= 2;
+		}
+
 		tokens[len++] = token;
 
 		token = strtok(NULL, delims);
