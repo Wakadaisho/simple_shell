@@ -16,7 +16,7 @@ void repl(void)
 	cmd = getInput();
 
 	/*Tokenize input*/
-	tokens = tokenize(cmd);
+	tokens = tokenize(cmd, NULL);
 
 	/*Execute command*/
 	executeCommand(tokens);
