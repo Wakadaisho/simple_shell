@@ -11,32 +11,39 @@
  */
 char **tokenize(char *s, char *delims)
 {
-	int size = 10;
+	int n = 10 * sizeof(char *);
 	int len = 0;
-	char *default_delims = " \t";
-	char *token = NULL;
-	char **tokens = malloc(size * sizeof(char *));
+	char *default_delims = " \t\n";
+	char *token = NULL, *str;
+	char **tokens = malloc(n);
 
-	if (tokens == NULL)
+	str = _strdup(s);
+
+	if (tokens == NULL || str == NULL)
 		return (NULL);
 
 	if (delims == NULL)
 		delims = default_delims;
 
-	token = strtok(s, delims);
+	token = _strtok_r(str, delims, &str);
 
 	while (token)
 	{
 		/* TO_DO: Realloc if tokens is full */
-		if (len >= size)
+		if (len >= n)
 		{
-			tokens = realloc(tokens, size * 2 * sizeof(char *));
-			size *= 2;
+			tokens = (char **)_realloc((void **)tokens, n, 2 * n);
+			if (tokens == NULL)
+			{
+				free(str);
+				return (NULL);
+			}
+			n *= 2;
 		}
 
 		tokens[len++] = token;
 
-		token = strtok(NULL, delims);
+		token = _strtok_r(NULL, delims, &str);
 	}
 
 	tokens[len] = NULL;

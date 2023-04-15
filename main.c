@@ -5,14 +5,18 @@
  *
  * @argc: number of command line arguments
  * @argv: command line arguments
+ * @env: environment variables
  *
  * Return:	0 - success
  */
-int main(int argc, char **argv)
+int main(int argc, char **argv, char **env)
 {
+	_environ(env, 0);
+
 	if (!isatty(fileno(stdin)))
 	{
 		repl();
+		_environ(NULL, 1);
 		return (0);
 	}
 
@@ -24,5 +28,6 @@ int main(int argc, char **argv)
 		repl();
 	}
 
+	_environ(NULL, 1);
 	return (0);
 }
