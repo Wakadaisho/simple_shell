@@ -16,6 +16,8 @@ int executeCommand(char **args)
 
 	char *cmd = args[0];
 
+	/*check if builtin command and execute*/
+
 	cmd = getCmdPath(cmd);
 
 	if (cmd == NULL)

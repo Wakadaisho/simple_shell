@@ -19,26 +19,14 @@ char *_strjoin(char *a, char *b, char *j)
 
 	s = p = malloc(len_a + len_b + len_j + 1);
 
-	while (a && *a)
-	{
+	for (; a && *a; p++, a++)
 		*p = *a;
-		p++;
-		a++;
-	}
 
-	while (j && *j)
-	{
+	for (; j && *j; p++, j++)
 		*p = *j;
-		p++;
-		j++;
-	}
 
-	while (b && *b)
-	{
+	for (; b && *b; p++, b++)
 		*p = *b;
-		p++;
-		b++;
-	}
 
 	*p = '\0';
 
@@ -91,4 +79,49 @@ char *_strtok_r(char *s, char *delim, char **start)
 	*end = '\0';
 	*start = end + 1;
 	return (s);
+}
+
+/**
+ * _itoa - convert an integer to a string
+ *
+ * @n:integer to convert to a string
+ *
+ * Return:	pointer to string
+ *		NULL on failure
+ */
+char *_itoa(int n)
+{
+	char *n_str;
+	int negative = n < 0, power = 1, len = 1, i = 0, tmp;
+
+	if (negative)
+	{
+		n *= -1;
+		len += 1;
+	}
+
+	tmp = n;
+
+	if (n == 0)
+	{
+		n_str = malloc(2 * sizeof(char));
+		n_str[0] = '0';
+		n_str[1] = '\0';
+		return (n_str);
+	}
+
+	for (; n > 9; n /= 10, len++)
+		power *= 10;
+
+	n_str = malloc((len + 1) * sizeof(char));
+
+	if (negative)
+		n_str[i++] = '-';
+
+	for (; i < len; i++, tmp %= power, power /= 10)
+		n_str[i] = '0' + tmp / power;
+
+	n_str[i] = '\0';
+
+	return (n_str);
 }

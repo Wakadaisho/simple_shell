@@ -35,17 +35,13 @@ char *_strdup(char *s)
  */
 int _strcmp(char *s1, char *s2)
 {
-	int delta = 0;
+	int delta;
 
 	if (s1 == NULL || s2 == NULL)
 		return (-1);
 
-	while (*s1 && *s2 && delta == 0)
-	{
+	for (delta = *s1 - *s2; *s1 && *s2 && delta == 0; s1++, s2++)
 		delta = *s1 - *s2;
-		s1++;
-		s2++;
-	}
 
 	return (delta);
 }
@@ -64,11 +60,8 @@ int _strlen(char *s)
 	if (s == NULL)
 		return (0);
 
-	while (*s)
-	{
+	for (; *s; s++)
 		len++;
-		s++;
-	}
 
 	return (len);
 }
@@ -79,7 +72,7 @@ int _strlen(char *s)
  * @s: string to check
  * @sub: substring to look for
  *
- * Return:	index in string if substring is found
+ * Return:	index of first occurrence of substring is found
  *		-1 if not found
  */
 int _strcontains(char *s, char *sub)

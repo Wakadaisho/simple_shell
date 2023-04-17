@@ -65,7 +65,7 @@ char *_getenv(char *name)
 
 	while (env[i])
 	{
-		var = tokenize(_strdup(env[i++]), "=");
+		var = tokenize(env[i++], "=");
 		if (_strcmp(var[0], name) == 0)
 			return (var[1]);
 		free(var);

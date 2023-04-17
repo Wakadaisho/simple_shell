@@ -113,7 +113,7 @@ char **_environ(char **env, int mode);
  * @s: string to check
  * @sub: substring to look for
  *
- * Return:	index in string if substring is found
+ * Return:	index of first occurrence substring is found
  *		-1 if not found
  */
 int _strcontains(char *s, char *sub);
@@ -131,7 +131,18 @@ int _strcontains(char *s, char *sub);
 char *_strtok_r(char *s, char *delim, char **start);
 
 /**
- * _realloc - reallocates memory for an array of pointers
+ * _realloc - reallocates memory for an array of data
+ *
+ * @arr: array of data to reallocate memory for
+ * @old_size: old size of the array, to copy items over
+ * @new_size: new size of the reallocated array
+ *
+ * Return: void pointer;
+ */
+void *_realloc(void *arr, int old_size, int new_size);
+
+/**
+ * _reallocp - reallocates memory for an array of pointers
  *
  * @arr: array of pointers to reallocate memory for
  * @old_size: old size of the array, to copy items over
@@ -139,7 +150,7 @@ char *_strtok_r(char *s, char *delim, char **start);
  *
  * Return: void
  */
-void **_realloc(void **arr, int old_size, int new_size);
+void **_reallocp(void **arr, int old_size, int new_size);
 
 /**
  * getCmdPath - check whether a command exist in another path
@@ -156,10 +167,22 @@ char *getCmdPath(char *cmd);
  * filterComment - find an indicator in the command and end the string there
  *
  * @s: command to check for comment indicator
- * @indicator: indicator that signifies a comment e.g. '#'
+ * @indicator: indicator that signifies a comment e.g. "#"
  *
  * Return: void
  */
 void filterComment(char *s, char *indicator);
+
+/**
+ * _strsubstitute - replace occurrences of a subtring with a string
+ *
+ * @str: original string
+ * @sub: substring to replace
+ * @rep: strint to replace substring by
+ *
+ * Return:	pointer to new string
+ *		NULL on failure
+ */
+char *_strsubstitute(char *str, char *sub, char *rep);
 
 #endif /* _MAIN_H_ */
