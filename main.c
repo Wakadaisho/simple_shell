@@ -1,5 +1,6 @@
 #include "main.h"
-
+#include <signal.h>
+#define clear() printf("\033[H\033[J")
 /**
  * main - simple shell environment
  *
@@ -11,11 +12,12 @@
  */
 int main(int argc, char **argv, char **env)
 {
+	signal(SIGINT, endSignal);
 	_environ(env, 0);
 
 	if (!isatty(fileno(stdin)))
 	{
-		repl();
+		repl(argc, argv);
 		_environ(NULL, 1);
 		return (0);
 	}
@@ -25,7 +27,7 @@ int main(int argc, char **argv, char **env)
 		/*Display prompt*/
 		write(STDOUT_FILENO, "($) ", 4);
 
-		repl();
+		repl(argc, argv);
 	}
 
 	_environ(NULL, 1);

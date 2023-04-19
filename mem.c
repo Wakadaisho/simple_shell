@@ -7,13 +7,17 @@
  * @old_size: old size of the array, to copy items over
  * @new_size: new size of the reallocated array
  *
- * Return: void pointer;
+ * Return: char pointer
  */
-void *_realloc(void *arr, int old_size, int new_size)
+char *_realloc(char *arr, int old_size, int new_size)
 {
 	int i;
-	char *p = (char *) arr;
+	char *new_arr, *p;
 
+	if (arr == NULL)
+		arr = malloc(1);
+
+	p = (char *) arr;
 	if (new_size == 0)
 	{
 		if (arr)
@@ -24,14 +28,14 @@ void *_realloc(void *arr, int old_size, int new_size)
 	if (old_size >= new_size)
 		return (arr);
 
-	char *new_arr = malloc(new_size * sizeof(char));
+	new_arr = malloc(new_size  * sizeof(char));
 
 	for (i = 0; i < old_size; i++)
 		new_arr[i] = p[i];
 
 	free(arr);
 
-	return ((void *)new_arr);
+	return (new_arr);
 }
 
 /**
@@ -41,12 +45,14 @@ void *_realloc(void *arr, int old_size, int new_size)
  * @old_size: old size of the array, to copy items over
  * @new_size: new size of the reallocated array
  *
- * Return: void pointer to pointers
+ * Return: char pointer to pointers
  */
-void **_reallocp(void **arr, int old_size, int new_size)
+char **_reallocp(char **arr, int old_size, int new_size)
 {
+	char **new_arr, **p;
 	int i;
 
+	p = (char **) arr;
 	if (new_size == 0)
 	{
 		if (arr)
@@ -57,12 +63,35 @@ void **_reallocp(void **arr, int old_size, int new_size)
 	if (old_size >= new_size)
 		return (arr);
 
-	void **new_arr = malloc(new_size * sizeof(void *));
+	new_arr = malloc(new_size  * sizeof(char *));
 
 	for (i = 0; i < old_size; i++)
-		new_arr[i] = arr[i];
+		new_arr[i] = p[i];
 
 	free(arr);
 
 	return (new_arr);
+}
+
+/**
+ * _freeTokenized - free pointer to strings data
+ *
+ * @arr: array to be freed
+ *
+ * Return:	 1 - success
+ *		-1 - failure
+ */
+int _freeTokenized(char **arr)
+{
+	int i = 0;
+
+	if (arr == NULL)
+		return (1);
+
+	for (i = 0; arr[i]; i++)
+		free(arr[i]);
+
+	free(arr);
+
+	return (1);
 }

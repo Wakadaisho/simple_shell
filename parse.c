@@ -11,43 +11,40 @@
  */
 char **tokenize(char *s, char *delims)
 {
-	int n = 5 * sizeof(char *);
-	int len = 0;
-	char *default_delims = " \t\n";
-	char *token = NULL, *str;
-	char **tokens = malloc(n);
+	int n = 10, len = 0;
+	char *str, *p, *token = NULL;
+	char **tokens;
 
-	str = _strdup(s);
-
-	if (tokens == NULL || str == NULL)
+	if (s == NULL)
 		return (NULL);
 
-	if (delims == NULL)
-		delims = default_delims;
+	tokens = malloc(n * sizeof(char *));
 
-	token = _strtok_r(str, delims, &str);
+	if (tokens == NULL)
+		return (NULL);
+
+	p = str = _strdup(s);
+	if (p == NULL)
+		return (NULL);
+	token = _strdup(_strtok_r(str, delims, &str));
 
 	while (token)
 	{
-		/* TO_DO: Realloc if tokens is full */
-		if (len >= n)
+		if (len >= n) /* TO_DO: Realloc if tokens is full */
 		{
-			tokens = (char **)_reallocp((void **)tokens, n, 1.5 * n);
+			tokens = _reallocp(tokens, n, n * 1.5);
+			n *= 1.5;
 			if (tokens == NULL)
 			{
-				free(str);
+				free(p);
 				return (NULL);
 			}
-			n *= 1.5;
 		}
-
 		tokens[len++] = token;
-
-		token = _strtok_r(NULL, delims, &str);
+		token = _strdup(_strtok_r(NULL, delims, &str));
 	}
-
+	free(p);
 	tokens[len] = NULL;
-
 	return (tokens);
 }
 
@@ -70,6 +67,44 @@ void filterComment(char *s, char *indicator)
 
 	if (foundComment != -1)
 		s[foundComment] = '\0';
+}
+
+/**
+ * stripWhitespace - remove whitespace from the beginning and end of string
+ *
+ * @str: string to remove edge whitespace
+ *
+ * Return: pointer to new string
+ */
+char *stripWhitespace(char *str)
+{
+	char *whitespace = " \r\t";
+	char *s;
+	int i = 0;
+	char chrToStr[] = {'\0', '\0'};
+
+	if (str == NULL)
+		return (NULL);
+
+	*chrToStr = *(str + i);
+	/* ignore whitespace from front */
+	while (_strcontains(whitespace, chrToStr) != -1)
+		*chrToStr = *(str + ++i);
+
+	s = _strdup(str + i);
+	if (*s == '\0')
+		return (s);
+
+	i = _strlen(s);
+	*chrToStr = *(s + i);
+	/* null whitespace from back */
+	while (_strcontains(whitespace, chrToStr) != -1)
+	{
+		*(s + i) = '\0';
+		*chrToStr = *(s + --i);
+	}
+
+	return (s);
 }
 
 /**

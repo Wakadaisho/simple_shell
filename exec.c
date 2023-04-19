@@ -1,4 +1,5 @@
 #include <sys/wait.h>
+#include <errno.h>
 #include "main.h"
 
 /**
@@ -11,40 +12,78 @@
  */
 int executeCommand(char **args)
 {
-	int ret, status, i = 0;
-	char **aliases = NULL;
+	int wstatus, i = 0, error = 0;
+	char *cmd, *tmp;
+	int builtin;
 
-	char *cmd = args[0];
+	tmp = stripWhitespace(args[0]);
 
-	/*check if builtin command and execute*/
-
-	cmd = getCmdPath(cmd);
-
-	if (cmd == NULL)
+	if (_strlen(tmp) == 0)
 	{
-		perror("hsh");
-		return (-1);
+		free(tmp);
+		return (0);
 	}
 
+	/*check if builtin command and execute*/
+	builtin = execBuiltin(args);
+
+	cmd = getCmdPath(tmp, &error);
+	free(tmp);
+
+	if (cmd == NULL || error < 0)
+	{
+		return (error);
+	}
 	pid_t proc = fork();
 
 	if (proc == 0)
 	{
-		ret = execve(cmd, args, aliases);
-		perror(cmd);
-		exit(1);
+		execve(cmd, args, NULL);
 	}
 	else if (proc > 0)
 	{
-		do {
-			waitpid(proc, &status, WUNTRACED);
-		} while (!WIFEXITED(status) && !WIFSIGNALED(status));
-	} else
+		wait(&wstatus);
+	}
+	else
 	{
-		perror("hsh");
+		return (127);
 	}
 
-	return (ret);
+	free(cmd);
+	return (WEXITSTATUS(wstatus));
+}
+
+/**
+ * printError - print out an error that occured based on a code
+ * @cmd: command that caused the error
+ * @shell: name of shell application
+ * @errorCode: error code
+ *
+ * Return: void
+ */
+void printError(char *cmd, char *shell, int errorCode)
+{
+	char *cmdshell = _strjoin(shell, cmd, ": ");
+	char *error = NULL;
+
+	switch (errorCode)
+	{
+		case 0:
+			break;
+		case -2:
+			error = _strjoin(shell, "No such file or directory\n", ": ");
+			break;
+		case -3:
+			error = _strjoin(cmdshell, "command not found\n", ": ");
+			break;
+		default:
+			perror(shell);
+	}
+
+	write(STDERR_FILENO, error, _strlen(error));
+	if (error)
+		free(error);
+	free(cmdshell);
 }
 
 /**
@@ -53,12 +92,16 @@ int executeCommand(char **args)
  *		2. Executing said input
  *		3. Printing any output
  *
+ * @argc: number of arguments passed to main
+ * @argv: arguments passed to main
+ *
  * Return: void
  */
-void repl(void)
+void repl(int argc, char **argv)
 {
 	char *cmd = NULL;
 	char **tokens =  NULL;
+	int errorCode, i = 0;
 
 	/*Get user input*/
 	cmd = getInput();
@@ -66,21 +109,22 @@ void repl(void)
 	filterComment(cmd, "#");
 
 	if (_strlen(cmd) == 0)
-		return;
-
-	/*Tokenize input*/
-	tokens = tokenize(cmd, NULL);
-
-	/*Execute command*/
-	executeCommand(tokens);
-
-	/*Free memory allocations tokenize*/
-	if (tokens)
 	{
-		if (tokens[0])
-			free(tokens[0]);
-		free(tokens);
+		if (cmd != NULL)
+			free(cmd);
+		return;
 	}
 
+	/*Tokenize input*/
+	tokens = tokenize(cmd, " \t\n");
+
+	/*Execute command*/
+	errorCode = executeCommand(tokens);
+	/*
+	 * printError(cmd, argv[0], errorCode);
+	 */
+
+	/*Free memory allocations*/
+	_freeTokenized(tokens);
 	free(cmd);
 }

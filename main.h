@@ -8,6 +8,18 @@
 #include <string.h>
 
 /**
+ * struct built_in - Struct built_in
+ *
+ * @name: name of associated command
+ * @f: function to be called
+ */
+typedef struct built_in
+{
+	char *name;
+	int (*f)(char **args);
+} bi_t;
+
+/**
  * getInput - get string input from the user
  *
  * Return: pointer to string input
@@ -36,14 +48,27 @@ char **tokenize(char *s, char *delims);
 int executeCommand(char **args);
 
 /**
+ * printError - print out an error that occured based on a code
+ * @cmd: command that caused the error
+ * @shell: name of shell application
+ * @errorCode: error code
+ *
+ * Return: void
+ */
+void printError(char *cmd, char *shell, int errorCode);
+
+/**
  * repl - describe a transaction of:
  *		1. Taking input from the user
  *		2. Executing said input
  *		3. Printing any output
  *
+ * @argc: number of arguments passed to main
+ * @argv: arguments passed to main
+ *
  * Return: void
  */
-void repl(void);
+void repl(int argc, char **argv);
 
 /**
  * _getenv - get the value of an environment variable
@@ -137,9 +162,9 @@ char *_strtok_r(char *s, char *delim, char **start);
  * @old_size: old size of the array, to copy items over
  * @new_size: new size of the reallocated array
  *
- * Return: void pointer;
+ * Return: char pointer;
  */
-void *_realloc(void *arr, int old_size, int new_size);
+char *_realloc(char *arr, int old_size, int new_size);
 
 /**
  * _reallocp - reallocates memory for an array of pointers
@@ -148,20 +173,24 @@ void *_realloc(void *arr, int old_size, int new_size);
  * @old_size: old size of the array, to copy items over
  * @new_size: new size of the reallocated array
  *
- * Return: void
+ * Return: char pointer to pointers
  */
-void **_reallocp(void **arr, int old_size, int new_size);
+char **_reallocp(char **arr, int old_size, int new_size);
 
 /**
  * getCmdPath - check whether a command exist in another path
  *		and return that path
  *
  * @cmd: command to check in the PATH variable
+ * @error:	error code of command search
+ *		0 - found command
+ *		-1 - could not find file/directory
+ *		-2 - command doesn't exist
  *
  * Return:	new path if exists
  *		NULL if path does not exist
  */
-char *getCmdPath(char *cmd);
+char *getCmdPath(char *cmd, int *error);
 
 /**
  * filterComment - find an indicator in the command and end the string there
@@ -174,6 +203,15 @@ char *getCmdPath(char *cmd);
 void filterComment(char *s, char *indicator);
 
 /**
+ * stripWhitespace - remove whitespace from the beginning and end of string
+ *
+ * @str: string to remove edge whitespace
+ *
+ * Return: pointer to new string
+ */
+char *stripWhitespace(char *str);
+
+/**
  * _strsubstitute - replace occurrences of a subtring with a string
  *
  * @str: original string
@@ -184,5 +222,74 @@ void filterComment(char *s, char *indicator);
  *		NULL on failure
  */
 char *_strsubstitute(char *str, char *sub, char *rep);
+
+/**
+ * _freeTokenized - free pointer to strings data
+ *
+ * @arr: array to be freed
+ *
+ * Return:	 1 - success
+ *		-1 - failure
+ */
+int _freeTokenized(char **arr);
+
+/**
+ * _atoi - convert a string to an integer
+ * @s: string to convert to integer
+ *
+ * Return: int
+ */
+int _atoi(char *s);
+
+/**
+ * _itoa - convert an integer to a string
+ *
+ * @n:integer to convert to a string
+ *
+ * Return:	pointer to string
+ *		NULL on failure
+ */
+char *_itoa(int n);
+
+/**
+ * endSignal - clean the static environment variable
+ *
+ * @sig: signal received
+ *
+ * Return: void
+ */
+void endSignal(int sig);
+
+/**
+ * bi_exit - exit the shell
+ *
+ * @args: arguments to function
+ *
+ * Return:	 1 - success
+ *		-1 - fail
+ */
+int bi_exit(char **args);
+
+/**
+ * bi_cd - change current working directory
+ *
+ * @args: arguments to function
+ *
+ * Return:	 1 - success
+ *		-1 - fail
+ */
+int bi_cd(char **args);
+
+int (*getBuiltin(char *cmd))(char **args);
+
+/**
+ * execBuiltin - execute a command if it is a builtin
+ *
+ * @args: command typed to shell
+ *
+ * Return:	1 - success;
+ *		negative number on failure
+ */
+int execBuiltin(char **args);
 
 #endif /* _MAIN_H_ */
