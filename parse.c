@@ -70,15 +70,15 @@ void filterComment(char *s, char *indicator)
 }
 
 /**
- * stripWhitespace - remove whitespace from the beginning and end of string
+ * stripCharacters - strip from the beginning and end of string
  *
- * @str: string to remove edge whitespace
+ * @str: string to remove edge characters
+ * @chars: characters to strip
  *
  * Return: pointer to new string
  */
-char *stripWhitespace(char *str)
+char *stripCharacters(char *str, char *chars)
 {
-	char *whitespace = " \r\t";
 	char *s;
 	int i = 0;
 	char chrToStr[] = {'\0', '\0'};
@@ -87,8 +87,8 @@ char *stripWhitespace(char *str)
 		return (NULL);
 
 	*chrToStr = *(str + i);
-	/* ignore whitespace from front */
-	while (_strcontains(whitespace, chrToStr) != -1)
+	/* ignore chars from front */
+	while (_strcontains(chars, chrToStr) != -1)
 		*chrToStr = *(str + ++i);
 
 	s = _strdup(str + i);
@@ -98,7 +98,7 @@ char *stripWhitespace(char *str)
 	i = _strlen(s);
 	*chrToStr = *(s + i);
 	/* null whitespace from back */
-	while (_strcontains(whitespace, chrToStr) != -1)
+	while (_strcontains(chars, chrToStr) != -1)
 	{
 		*(s + i) = '\0';
 		*chrToStr = *(s + --i);

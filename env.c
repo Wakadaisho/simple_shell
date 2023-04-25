@@ -5,8 +5,10 @@
  * _environ - get environment variables from anywhere, statically
  *
  * @env:	environment variables to store, NULL to reuse stored
- * @mode:	0 - default, ovewrites environ to env if exists
- *		1 - free environ then quit (ignores env)
+ * @mode	-1 - initial seed (no free)
+ *		0 - returns environ (ignores env)
+ *		1 - sets environ, then returns it
+ *		2 - free environ then quit (ignores env)
  *
  * Return:	pointer to environment variable strings
  *		NULL if environment not previously given
@@ -16,12 +18,17 @@ char **_environ(char **env, int mode)
 	static char **environ;
 	int len = 0, i = 0;
 
-	if (mode == 1)
+	if (mode == FREE)
 	{
 		_freeTokenized(environ);
 		return (NULL);
 	}
 
+	if (mode == READ)
+	{
+		return (environ);
+	}
+	
 	if (env)
 	{
 		while (env[len])
@@ -32,6 +39,8 @@ char **_environ(char **env, int mode)
 		for (i = 0; i < len; i++)
 			environ[i] = _strdup(env[i]);
 		environ[i] = NULL;
+		if (mode != SEED )
+			_freeTokenized(env);
 	}
 	return (environ);
 }
@@ -47,7 +56,7 @@ char **_environ(char **env, int mode)
 char *_getenv(char *name)
 {
 	int i = 0;
-	char **env = _environ(NULL, 0);
+	char **env = _environ(NULL, READ);
 	char *key, *value;
 	char *ret, *str, *p;
 
@@ -71,19 +80,50 @@ char *_getenv(char *name)
 }
 
 /**
+ * _setenv - set the value of an environment variable
+ *
+ * @name: environment variable to set
+ * @value: value to set it to
+ *
+ * Return:	pointer to environment variable string
+ *		NULL on unset
+ */
+char *_setenv(char *name, char *value)
+{
+	char **args = malloc(3 * sizeof(char *));
+	char *val;
+
+	if (name == NULL)
+		return (NULL);
+
+	args[1] = _strdup(name);
+	args[2] = NULL;
+
+	if (value == NULL)
+	{
+		args[0] = _strdup("unsetenv");
+		bi_unsetenv(args);
+		_freeTokenized(args);
+		return (NULL);
+	}
+
+	args[0] = _strdup("setenv");
+	val = value == NULL ? _strdup("") : _strdup(value);
+	bi_setenv(args);
+	_freeTokenized(args);
+
+	return (NULL);
+}
+/**
  * getCmdPath - check whether a command exist in another path
  *		and return that path
  *
  * @cmd: command to check in the PATH variable
- * @error:	error code of command search
- *		0 - found command
- *		-1 - could not find file/directory
- *		-2 - command doesn't exist
  *
  * Return:	new path if exists
  *		NULL if path does not exist
  */
-char *getCmdPath(char *cmd, int *error)
+char *getCmdPath(char *cmd)
 {
 	int i = 0;
 	char *path;
@@ -91,7 +131,7 @@ char *getCmdPath(char *cmd, int *error)
 	char *location = NULL;
 	struct stat st;
 
-	*error = 0;
+	accessErrorCode(0, WRITE);
 
 	if (cmd == NULL || *cmd == '\0')
 		return (NULL);
@@ -100,7 +140,7 @@ char *getCmdPath(char *cmd, int *error)
 	{
 		if (stat(cmd, &st) == 0)
 			return (_strdup(cmd));
-		*error = -2;
+		accessErrorCode(-2, WRITE);
 		return (NULL);
 	}
 
@@ -121,7 +161,7 @@ char *getCmdPath(char *cmd, int *error)
 		i++;
 	}
 
-	*error = -3;
+	accessErrorCode(-3, WRITE);
 	free(path);
 	_freeTokenized(paths);
 	return (NULL);

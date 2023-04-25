@@ -7,6 +7,11 @@
 #include <stddef.h>
 #include <string.h>
 
+#define SEED -1
+#define READ 0
+#define WRITE 1
+#define FREE 2
+
 /**
  * struct built_in - Struct built_in
  *
@@ -22,9 +27,11 @@ typedef struct built_in
 /**
  * getInput - get string input from the user
  *
+ * @mode: 2 - Free memory
+ *
  * Return: pointer to string input
  */
-char *getInput(void);
+char *getInput(int code);
 
 /**
  * tokenize - split a string into an array of strings
@@ -43,19 +50,27 @@ char **tokenize(char *s, char *delims);
  * @args: pointer to a vector of C strings,
  *		ending with a NULL pointer
  *
- * Return: execve return value
+ * Return: void
  */
-int executeCommand(char **args);
+void executeCommand(char **args);
+
+/**
+ * accessErrorCode - get or set error code
+ * 
+ * @code: error code to set
+ * @mode:	1 - set code
+ * Return: error code set or requested
+ */
+int accessErrorCode(int code, int mode);
 
 /**
  * printError - print out an error that occured based on a code
  * @cmd: command that caused the error
  * @shell: name of shell application
- * @errorCode: error code
  *
  * Return: void
  */
-void printError(char *cmd, char *shell, int errorCode);
+void printError(char *cmd, char *shell);
 
 /**
  * repl - describe a transaction of:
@@ -79,6 +94,17 @@ void repl(int argc, char **argv);
  *		NULL if not found
  */
 char *_getenv(char *name);
+
+/**
+ * _setenv - set the value of an environment variable
+ *
+ * @name: environment variable to set
+ * @value: value to set it to
+ *
+ * Return:	pointer to environment variable string
+ *		NULL on unset
+ */
+char *_setenv(char *name, char *value);
 
 /**
  * _strcmp - compares two strings
@@ -182,15 +208,11 @@ char **_reallocp(char **arr, int old_size, int new_size);
  *		and return that path
  *
  * @cmd: command to check in the PATH variable
- * @error:	error code of command search
- *		0 - found command
- *		-1 - could not find file/directory
- *		-2 - command doesn't exist
  *
  * Return:	new path if exists
  *		NULL if path does not exist
  */
-char *getCmdPath(char *cmd, int *error);
+char *getCmdPath(char *cmd);
 
 /**
  * filterComment - find an indicator in the command and end the string there
@@ -203,13 +225,14 @@ char *getCmdPath(char *cmd, int *error);
 void filterComment(char *s, char *indicator);
 
 /**
- * stripWhitespace - remove whitespace from the beginning and end of string
+ * stripCharacters - strip from the beginning and end of string
  *
- * @str: string to remove edge whitespace
+ * @str: string to remove edge characters
+ * @chars: characters to strip
  *
  * Return: pointer to new string
  */
-char *stripWhitespace(char *str);
+char *stripCharacters(char *str, char *chars);
 
 /**
  * _strsubstitute - replace occurrences of a subtring with a string
@@ -280,6 +303,36 @@ int bi_exit(char **args);
  */
 int bi_cd(char **args);
 
+/**
+ * bi_env - print the environment variables
+ *
+ * @args: arguments to function
+ *
+ * Return:	 1 - success
+ *		-1 - fail
+ */
+int bi_env(char **args);
+
+/**
+ * bi_setenv - insert/update an environment variable
+ *
+ * @args: arguments to function
+ *
+ * Return:	 1 - success
+ *		-1 - fail
+ */
+int bi_setenv(char **args);
+
+/**
+ * bi_unsetenv - remove an environment variable
+ *
+ * @args: arguments to function
+ *
+ * Return:	 1 - success
+ *		-1 - fail
+ */
+int bi_unsetenv(char **args);
+
 int (*getBuiltin(char *cmd))(char **args);
 
 /**
@@ -287,9 +340,32 @@ int (*getBuiltin(char *cmd))(char **args);
  *
  * @args: command typed to shell
  *
- * Return:	1 - success;
- *		negative number on failure
+ * Return: void
  */
-int execBuiltin(char **args);
+void execBuiltin(char **args);
+
+/**
+ * _aliases - get/set aliases from anywhere, statically
+ *
+ * @env:	environment variables to store, NULL to reuse stored
+ * @mode	-1 - initial seed (no free)
+ *		0 - returns environ (ignores env)
+ *		1 - sets environ, then returns it
+ *		2 - free environ then quit (ignores env)
+ *
+ * Return:	pointer to environment variable strings
+ *		NULL if environment not previously given
+ */
+char **_aliases(char **args, int mode);
+
+/*
+ * bi_alias - insert/update an alias
+ *
+ * @args: arguments to function
+ *
+ * Return:	 1 - success
+ *		-1 - fail
+ */
+int bi_alias(char **args);
 
 #endif /* _MAIN_H_ */
