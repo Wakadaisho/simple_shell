@@ -45,10 +45,7 @@ char *getInput(int mode)
 		exit(0);
 	}
 	if (bytes < 0)
-	{
-		perror("read error");
 		exit(1);
-	}
 	line = _realloc(line, len, len + 1);
 	line[len] = '\0';
 	return (line);
