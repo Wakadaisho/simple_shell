@@ -1,6 +1,6 @@
 #include "main.h"
 
-#define SIZE 1
+#define SIZE 1024
 
 /**
  * getInput - get string input from the user
@@ -21,8 +21,9 @@ char *getInput(int mode)
 			free(line);
 		return (NULL);
 	}
-	if (line == 0)
-		line = malloc(SIZE);
+	if (line)
+		free(line);
+	line = malloc(SIZE);
 	while ((bytes = read(STDIN_FILENO, buf, SIZE)) > 0)
 	{
 		for (i = 0; i < bytes; i++)
