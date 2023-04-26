@@ -12,7 +12,7 @@
 char *getInput(int mode)
 {
 	char buf[SIZE];
-	int len = 0, capacity = SIZE, bytes;
+	int len = 0, capacity = SIZE, bytes, i;
 	static char *line;
 
 	if (mode == FREE)
@@ -25,7 +25,7 @@ char *getInput(int mode)
 		line = malloc(SIZE);
 	while ((bytes = read(STDIN_FILENO, buf, SIZE)) > 0)
 	{
-		for (int i = 0; i < bytes; i++)
+		for (i = 0; i < bytes; i++)
 		{
 			if (buf[i] == '\n')
 			{
@@ -138,7 +138,7 @@ char **_readfile(char *filename)
 	{
 		for (; lines_len >= lines_cap; lines_cap *= 2)
 			lines = _reallocp(lines, lines_len, lines_cap * 2);
-		lines[line_len] == NULL;
+		lines[line_len] = NULL;
 	}
 	return (lines);
 }

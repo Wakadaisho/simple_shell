@@ -11,7 +11,6 @@
  */
 char *_strjoin(char *a, char *b, char *j)
 {
-	int i;
 	int len_a = _strlen(a);
 	int len_b = _strlen(b);
 	int len_j = _strlen(j);
@@ -46,7 +45,6 @@ char *_strjoin(char *a, char *b, char *j)
 char *_strtok_r(char *s, char *delim, char **start)
 {
 	char *end;
-	int len = 0;
 	char l_match = 0, r_match = 0, chrToStr[] = {'\0', '\0'};
 
 	if (s == NULL)

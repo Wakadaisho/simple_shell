@@ -160,6 +160,7 @@ int bi_env(char **args)
 	int i;
 	char **env = _environ(NULL, READ);
 
+	args = args;
 	for (i = 0; env[i]; i++)
 	{
 		write(STDOUT_FILENO, env[i], _strlen(env[i]));

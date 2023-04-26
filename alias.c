@@ -104,10 +104,9 @@ char *_getalias(char *name)
  */
 int listAliases(char **args)
 {
-	int i = 0, j = 0, len = 0;
+	int i = 0, j = 0;
 	char **aliases = _aliases(NULL, READ);
 	char **kv;
-	char **var, **var_cpy;
 
 	if (aliases == NULL)
 		return (1);

@@ -78,12 +78,11 @@ void printError(char *cmd, char *shell);
  *		2. Executing said input
  *		3. Printing any output
  *
- * @argc: number of arguments passed to main
  * @argv: arguments passed to main
  *
  * Return: void
  */
-void repl(int argc, char **argv);
+void repl(char **argv);
 
 /**
  * _getenv - get the value of an environment variable
@@ -429,12 +428,11 @@ int continueChain(char *op, int errorCode);
 /**
  * execScript - execute commands in a file line by line
  *
- * @argc: number of arguments passed to main
  * @argv: arguments passed to main
  *
  * Return: void
  */
-void execScript(int argc, char **argv);
+void execScript(char **argv);
 
 /**
  * _readfile - open a file and read in the contents to memory

@@ -93,7 +93,6 @@ char *_getenv(char *name)
 char *_setenv(char *name, char *value)
 {
 	char **args = malloc(4 * sizeof(char *));
-	char *val;
 
 	if (name == NULL)
 		return (NULL);

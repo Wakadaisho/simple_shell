@@ -17,11 +17,11 @@ int main(int argc, char **argv, char **env)
 	_aliases(NULL, SEED);
 
 	if (argc >= 2)
-		execScript(argc, argv);
+		execScript(argv);
 
 	if (!isatty(fileno(stdin)))
 	{
-		repl(argc, argv);
+		repl(argv);
 		getInput(FREE);
 		_environ(NULL, FREE);
 		return (0);
@@ -32,7 +32,7 @@ int main(int argc, char **argv, char **env)
 		/*Display prompt*/
 		write(STDOUT_FILENO, "($) ", 4);
 
-		repl(argc, argv);
+		repl(argv);
 	}
 
 	_environ(NULL, FREE);

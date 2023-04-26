@@ -9,6 +9,7 @@
  */
 void endSignal(int sig)
 {
+	sig = sig;
 	write(STDOUT_FILENO, "\n($) ", 5);
 	return;
 	/**

@@ -44,7 +44,7 @@ int continueChain(char *op, int errorCode)
  */
 void executeCommand(char **args)
 {
-	int wstatus, i = 0;
+	int wstatus;
 	char *cmd, *tmp;
 	pid_t proc;
 
@@ -92,12 +92,11 @@ void executeCommand(char **args)
  *		2. Executing said input
  *		3. Printing any output
  *
- * @argc: number of arguments passed to main
  * @argv: arguments passed to main
  *
  * Return: void
  */
-void repl(int argc, char **argv)
+void repl(char **argv)
 {
 	char *cmd = NULL, *alias = NULL, *tmp = NULL;
 	char **tokens =  NULL;

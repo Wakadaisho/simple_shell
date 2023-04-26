@@ -112,5 +112,5 @@ void cleanMemory(void)
 	_accesscmds(NULL, FREE);
 	bi_cd(cd_free);
 	free(cd_free);
-	execScript(0, NULL);
+	execScript(NULL);
 }

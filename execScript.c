@@ -32,14 +32,13 @@ char **cmdOrAlias(char *cmd)
 /**
  * execScript - execute commands in a file line by line
  *
- * @argc: number of arguments passed to main
  * @argv: arguments passed to main
  *
  * Return: void
  */
-void execScript(int argc, char **argv)
+void execScript(char **argv)
 {
-	char *alias = NULL, **tokens = NULL, ***cmds = NULL, *tmp;
+	char **tokens = NULL, ***cmds = NULL, *tmp;
 	static char **lines;
 	int ec = 0, i = 0, j = 0, k = 0;
 
