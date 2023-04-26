@@ -138,7 +138,7 @@ char *getCmdPath(char *cmd)
 	if (cmd == NULL || *cmd == '\0')
 		return (NULL);
 
-	if (_strcontains(cmd, "./") == 0)
+	if (_strcontains(cmd, "/") != -1)
 	{
 		if (stat(cmd, &st) == 0)
 			return (_strdup(cmd));
