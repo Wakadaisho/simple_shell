@@ -22,7 +22,7 @@ char *_strjoin(char *a, char *b, char *j)
 	for (; a && *a; p++, a++)
 		*p = *a;
 
-	for (; j && *j; p++, j++)
+	for (; a && b && j && *j; p++, j++)
 		*p = *j;
 
 	for (; b && *b; p++, b++)
@@ -47,35 +47,40 @@ char *_strtok_r(char *s, char *delim, char **start)
 {
 	char *end;
 	int len = 0;
-	char chrToStr[] = {'\0', '\0'};
+	char l_match = 0, r_match = 0, chrToStr[] = {'\0', '\0'};
 
 	if (s == NULL)
 		s = *start;
-
 	*chrToStr = *s;
-	/*Skip all the delimeters*/
 	while (*s && _strcontains(delim, chrToStr) != -1)
 		*chrToStr = *++s;
-
 	if (*s == '\0')
 	{
 		*start = s;
 		return (NULL);
 	}
-
 	end = s;
-
-	*chrToStr = *end;
-	/*iterate through the token*/
-	while (*end && _strcontains(delim, chrToStr) == -1)
-		*chrToStr = *++end;
-
+	for (*chrToStr = *end; *end; *chrToStr = *++end)
+	{
+		if (*end == '\'' || *end == '\"')
+		{
+			if (l_match == r_match)
+			{
+				l_match = *end;
+			}
+			else
+			{
+				r_match = *end;
+			}
+		}
+		if (_strcontains(delim, chrToStr) != -1 && l_match == r_match)
+			break;
+	}
 	if (*end == '\0')
 	{
 		*start = end;
 		return (s);
 	}
-
 	*end = '\0';
 	*start = end + 1;
 	return (s);
@@ -168,3 +173,43 @@ int _atoi(char *s)
 
 	return (parity < 0 ? -1 * result : result);
 }
+
+/**
+ * _strsubstitute - replace occurrences of a subtring with a string
+ *
+ * @str: original string
+ * @sub: substring to replace
+ * @rep: strint to replace substring by
+ *
+ * Return:	pointer to new string
+ *		NULL on failure
+ */
+char *_strsubstitute(char *str, char *sub, char *rep)
+{
+	int pos, i, lr = _strlen(rep), ls = _strlen(sub), delta = lr - ls;
+	char *tmp, *s = _strdup(str);
+
+	if (lr == 0)
+		rep = "";
+
+	if (ls == 0)
+		return (s);
+
+	for (pos = _strcontains(s, sub); pos != -1;)
+	{
+		tmp = malloc(_strlen(s) + delta + 1);
+		for (i = 0; i < pos; i++)			/*copy string to pos*/
+			tmp[i] = s[i];
+		for (i = 0; i < lr; i++)			/*add replacement*/
+			tmp[pos + i] = rep[i];
+		for (i = pos; *(s + ls + i); i++)		/*copy rest of string*/
+			tmp[i + lr] = s[i + ls];
+		tmp[i + lr] = '\0';
+		free(s);
+		s = tmp;
+		pos = _strcontains(s, sub);
+	}
+
+	return (s);
+}
+

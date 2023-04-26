@@ -41,9 +41,11 @@ int _strcmp(char *s1, char *s2)
 
 	if (s1 == NULL || s2 == NULL)
 		return (-1);
-
 	for (delta = *s1 - *s2; *s1 && *s2 && delta == 0; s1++, s2++)
 		delta = *s1 - *s2;
+
+	if (*s1 != *s2)
+		return (*s1 - *s2);
 
 	return (delta);
 }

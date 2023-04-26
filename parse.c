@@ -1,6 +1,42 @@
 #include "main.h"
 
 /**
+ * getQuotedString - get tokens surrounded by quotes as one string
+ *
+ * @token: first token with a quote
+ * @delims: characters to split the string by
+ * @str: keep track of last position in string
+ *
+ * Return: single string token
+ */
+char *getQuotedString(char *token, char *delims, char **str)
+{
+	char *_t = NULL;
+	char *q_token = NULL, *q_temp = NULL;
+	char l_match = 0, r_match = 0;
+
+	if (token == NULL)
+		return (NULL);
+	l_match = *token;
+	_t = _strdup(token);
+	while (_t)
+	{
+		r_match = _t[_strlen(_t) - 1];
+		q_temp = _strjoin(q_token, _t, " ");
+		if (q_token)
+			free(q_token);
+		q_token = q_temp;
+		free(_t);
+		if (l_match == r_match)
+			return (q_token);
+		_t = _strdup(_strtok_r(NULL, delims, str));
+	}
+	if (_t)
+		free(_t);
+	return (q_token);
+}
+
+/**
  * tokenize - split a string into an array of strings
  *		based on certain DELIMS (delimiters)
  * @s: string to split
@@ -12,35 +48,34 @@
 char **tokenize(char *s, char *delims)
 {
 	int n = 10, len = 0;
-	char *str, *p, *token = NULL;
+	char *str, *p, *token = NULL, *q_token = NULL;
 	char **tokens;
 
 	if (s == NULL)
 		return (NULL);
-
 	tokens = malloc(n * sizeof(char *));
-
 	if (tokens == NULL)
 		return (NULL);
-
 	p = str = _strdup(s);
 	if (p == NULL)
 		return (NULL);
 	token = _strdup(_strtok_r(str, delims, &str));
-
 	while (token)
 	{
-		if (len >= n) /* TO_DO: Realloc if tokens is full */
-		{
+		for (; len >= n; n *= 1.5)
 			tokens = _reallocp(tokens, n, n * 1.5);
-			n *= 1.5;
-			if (tokens == NULL)
-			{
-				free(p);
-				return (NULL);
-			}
+		if (*token == '\'' || *token == '\"')
+			q_token = getQuotedString(token, delims, &str);
+		if (q_token)
+		{
+			tokens[len++] = q_token;
+			free(token);
+			q_token = NULL;
 		}
-		tokens[len++] = token;
+		else
+		{
+			tokens[len++] = token;
+		}
 		token = _strdup(_strtok_r(NULL, delims, &str));
 	}
 	free(p);
@@ -97,7 +132,7 @@ char *stripCharacters(char *str, char *chars)
 
 	i = _strlen(s);
 	*chrToStr = *(s + i);
-	/* null whitespace from back */
+	/* null chars from back */
 	while (_strcontains(chars, chrToStr) != -1)
 	{
 		*(s + i) = '\0';
@@ -108,40 +143,51 @@ char *stripCharacters(char *str, char *chars)
 }
 
 /**
- * _strsubstitute - replace occurrences of a subtring with a string
+ * tokenizeCommand - separate a command based on logical operators
  *
- * @str: original string
- * @sub: substring to replace
- * @rep: strint to replace substring by
+ * @s: command string to tokenize
  *
- * Return:	pointer to new string
- *		NULL on failure
+ * Return: pointer to two lists of commands and logical operators
  */
-char *_strsubstitute(char *str, char *sub, char *rep)
+char ***tokenizeCommand(char *s)
 {
-	int pos, i, lr = _strlen(rep), ls = _strlen(sub), delta = lr - ls;
-	char *tmp, *s = _strdup(str);
+	int ops_len = 0, ops_cap = 2, cmds_len = 0, cmds_cap = 2, i, op;
+	char *cmd = NULL, *tmp = NULL;
+	char **cmds = malloc(cmds_cap * sizeof(char *));
+	char **ops = NULL, **t = tokenize(s, " \r\t");
+	char ***ret = malloc(2 * sizeof(char **));
 
-	if (lr == 0)
-		rep = "";
-
-	if (ls == 0)
-		return (s);
-
-	for (pos = _strcontains(s, sub); pos != -1;)
+	for (op = 0, i = 0; t[i]; i++, op ^= op)
 	{
-		tmp = malloc(_strlen(s) + delta + 1);
-		for (i = 0; i < pos; i++)			/*copy string to pos*/
-			tmp[i] = s[i];
-		for (i = 0; i < lr; i++)			/*add replacement*/
-			tmp[pos + i] = rep[i];
-		for (i = pos; *(s + ls + i); i++)		/*copy rest of string*/
-			tmp[i + lr] = s[i + ls];
-		tmp[i + lr] = '\0';
-		free(s);
-		s = tmp;
-		pos = _strcontains(s, sub);
+		op += _strcontains(t[i], "&&") != -1;
+		op += _strcontains(t[i], "||") != -1;
+		op += _strcontains(t[i], ";") != -1;
+		if (op)
+		{
+			if (ops == NULL)
+				ops = malloc(ops_cap * sizeof(char *));
+			for (; cmds_len >= cmds_cap - 1; cmds_cap *= 2)
+				cmds = _reallocp(cmds, cmds_len, cmds_cap * 2);
+			for (; ops_len >= ops_cap - 1; ops_cap *= 2)
+				ops = _reallocp(ops, ops_len, ops_cap * 2);
+			cmds[cmds_len++] = cmd;
+			cmd = NULL;
+			cmds[cmds_len] = NULL;
+			ops[ops_len++] = _strdup(t[i]);
+			ops[ops_len] = NULL;
+			continue;
+		}
+		tmp = _strjoin(cmd, t[i], " ");
+		if (cmd)
+			free(cmd);
+		cmd = tmp;
 	}
-
-	return (s);
+	for (; cmds_len >= cmds_cap - 1; cmds_cap *= 2)
+		cmds = _reallocp(cmds, cmds_len, cmds_cap * 2);
+	cmds[cmds_len++] = cmd;
+	cmds[cmds_len] = NULL;
+	ret[0] = cmds;
+	ret[1] = ops;
+	_freeTokenized(t);
+	return (ret);
 }

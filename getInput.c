@@ -12,49 +12,133 @@
 char *getInput(int mode)
 {
 	char buf[SIZE];
-	int len = 0, capacity = SIZE;
-	static int firstRun = 1;
+	int len = 0, capacity = SIZE, bytes;
 	static char *line;
-	ssize_t bytes;
-	if (mode == FREE && !firstRun)
+
+	if (mode == FREE)
 	{
-		free(line);
+		if (line)
+			free(line);
 		return (NULL);
 	}
-	if (firstRun)
-	{
-		firstRun = 0;
+	if (line == 0)
 		line = malloc(SIZE);
-	}
 	while ((bytes = read(STDIN_FILENO, buf, SIZE)) > 0)
 	{
 		for (int i = 0; i < bytes; i++)
 		{
 			if (buf[i] == '\n')
 			{
-				line = realloc(line, len + 1);
+				line = _realloc(line, len, len + 1);
 				line[len] = '\0';
 				return (line);
 			}
-			if (len == capacity)
-			{
-				capacity *= 2;
-				line = realloc(line, capacity);
-			}
+			for (; len >= capacity; capacity *= 2)
+				line = _realloc(line, len, capacity * 2);
 			line[len++] = buf[i];
 		}
 	}
-	if(bytes == 0)		/* read EOF*/
+	if (bytes == 0)		/* read EOF*/
 	{
-		free(line);
-		_environ(NULL, FREE);
+		cleanMemory();
 		exit(0);
 	}
-	if (bytes < 0) {
+	if (bytes < 0)
+	{
 		perror("read error");
 		exit(1);
 	}
 	line = realloc(line, len + 1);
 	line[len] = '\0';
 	return (line);
+}
+
+/**
+ * _accesscmds - return commands and logical operators tokenized
+ *
+ * @args:	two lists of commands and logical operators
+ * @mode:	0 - returns cmds (ignores args)
+ *		1 - sets cmds, then returns it
+ *		2 - free cmds then quit (ignores env)
+ *
+ * Return: pointer to lists of command and logical operators
+ */
+char ***_accesscmds(char ***args, int mode)
+{
+	static char ***cmds;
+
+	if (mode == READ)
+		return (cmds);
+
+	if (mode == FREE)
+	{
+		if (cmds == 0)
+			return (NULL);
+		if (cmds[0])
+			_freeTokenized(cmds[0]);
+		if (cmds[1])
+			_freeTokenized(cmds[1]);
+		free(cmds);
+		cmds = NULL;
+		return (NULL);
+	}
+
+	if (mode == WRITE)
+	{
+		_accesscmds(NULL, FREE);
+		cmds = args;
+		return (cmds);
+	}
+
+	return (cmds);
+}
+
+/**
+ * _readfile - open a file and read in the contents to memory
+ *
+ * @filename: name of file to read content from
+ *
+ * Return: pointer to strings list
+ */
+char **_readfile(char *filename)
+{
+	int line_len = 0, lines_len = 0, line_cap = 10, lines_cap = 10, bytes;
+	char *c = malloc(sizeof(char));
+	char *line = NULL, **lines = malloc(lines_cap * sizeof(char *));
+	int fd = open(filename, O_RDONLY);
+
+	if (fd == -1)
+	{
+		accessErrorCode(-2, WRITE);
+		cleanMemory();
+		exit(1);
+	}
+
+	while ((bytes = read(fd, c, 1)) > 0)
+	{
+		if (line == NULL)
+			line = malloc(line_cap * sizeof(char));
+		for (; line_len >= line_cap; line_cap *= 2)
+			line = _realloc(line, line_len, line_cap * 2);
+		for (; lines_len >= lines_cap; lines_cap *= 2)
+			lines = _reallocp(lines, lines_len, lines_cap * 2);
+		if (*c == '\n')
+		{
+			line[line_len] = '\0';
+			line_len = 0;
+			lines[lines_len++] = line;
+			line = NULL;
+			continue;
+		}
+		line[line_len++] = *c;
+	}
+	free(c);
+	close(fd);
+	if (bytes == -1)
+	{
+		for (; lines_len >= lines_cap; lines_cap *= 2)
+			lines = _reallocp(lines, lines_len, lines_cap * 2);
+		lines[line_len] == NULL;
+	}
+	return (lines);
 }

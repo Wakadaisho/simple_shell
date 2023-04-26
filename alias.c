@@ -3,14 +3,14 @@
 /**
  * _aliases - get/set aliases from anywhere, statically
  *
- * @env:	environment variables to store, NULL to reuse stored
- * @mode	-1 - initial seed (no free)
- *		0 - returns environ (ignores env)
- *		1 - sets environ, then returns it
- *		2 - free environ then quit (ignores env)
+ * @args:	alias to store, NULL to reuse stored
+ * @mode:	-1 - initial seed (no free)
+ *		0 - returns aliases (ignores args)
+ *		1 - sets aliases, then returns it
+ *		2 - free aliases then quit (ignores env)
  *
- * Return:	pointer to environment variable strings
- *		NULL if environment not previously given
+ * Return:	pointer to aliases strings
+ *		NULL if args not previously given
  */
 char **_aliases(char **args, int mode)
 {
@@ -35,7 +35,7 @@ char **_aliases(char **args, int mode)
 	{
 		return (aliases);
 	}
-	
+
 	if (args)
 	{
 		while (args[len])
@@ -46,23 +46,61 @@ char **_aliases(char **args, int mode)
 		for (i = 0; i < len; i++)
 			aliases[i] = _strdup(args[i]);
 		aliases[i] = NULL;
-		if (mode != SEED )
+		if (mode != SEED)
 			_freeTokenized(args);
 	}
 	return (aliases);
 }
 
 /**
+ * _getalias - get the value of an alias
+ *
+ * @name: alias to search for
+ *
+ * Return:	pointer to alias string
+ *		NULL if not found
+ */
+char *_getalias(char *name)
+{
+	int i = 0;
+	char **env = _aliases(NULL, READ);
+	char *key, *value;
+	char *ret = NULL, *str, *p;
+	char chrToStr[] = {'\0', '\0'};
+
+	while (env[i])
+	{
+		p = str = _strdup(env[i++]);
+		key = _strdup(_strtok_r(str, "=", &str));
+		value = _strdup(str);
+		free(p);
+		if (_strcmp(name, key) == 0)
+		{
+			if (*value == '"' || *value == '\'')
+			{
+				chrToStr[0] = *value;
+				ret = stripCharacters(value, chrToStr);
+				free(value);
+				free(key);
+				return (ret);
+			}
+			ret = value;
+			free(key);
+			return (ret);
+		}
+		free(key);
+		free(value);
+	}
+	return (NULL);
+}
+
+/**
  * listAliases - print out aliases to stdout
  *
- * @env:	environment variables to store, NULL to reuse stored
- * @mode	-1 - initial seed (no free)
- *		0 - returns environ (ignores env)
- *		1 - sets environ, then returns it
- *		2 - free environ then quit (ignores env)
+ * @args:	aliases to store, NULL to reuse stored
  *
- * Return:	pointer to environment variable strings
- *		NULL if environment not previously given
+ * Return:	pointer to alias strings
+ *		NULL if aliases not previously given
  */
 int listAliases(char **args)
 {
@@ -73,7 +111,7 @@ int listAliases(char **args)
 
 	if (aliases == NULL)
 		return (1);
-	
+
 	if (args[1] == NULL)
 	{
 		for (i = 0; aliases[i]; i++)
@@ -88,7 +126,7 @@ int listAliases(char **args)
 		kv = tokenize(aliases[i], "=");
 		for (j = 1; args[j]; j++)
 		{
-			if (_strcmp(args[j], kv[0])==0)
+			if (_strcmp(args[j], kv[0]) == 0)
 			{
 				write(STDOUT_FILENO, aliases[i], _strlen(aliases[i]));
 				write(STDOUT_FILENO, "\n", 1);
@@ -100,7 +138,7 @@ int listAliases(char **args)
 	return (1);
 }
 
-/*
+/**
  * bi_alias - insert/update an alias
  *
  * @args: arguments to function
@@ -111,17 +149,16 @@ int listAliases(char **args)
 int bi_alias(char **args)
 {
 	int i = 0, k = 0;
-	char **aliases, **aliases_cpy, **kv, **kv_a;
+	char **aliases = NULL, **aliases_cpy, **kv = NULL, **kv_a = NULL;
 	int set = 0;
 
 	if (args[1] == NULL || _strcontains(args[1], "=") == -1)
-		return listAliases(args);
-	
-	for (k = 1; args[k]; k++, set -= set)
+		return (listAliases(args));
+	for (k = 1; args[k]; k++, set ^= set)
 	{
 		aliases = _aliases(NULL, READ);
 		kv = tokenize(args[k], "=");
-		for (i =0; aliases[i]; i++)
+		for (i = 0; aliases[i]; i++)
 		{
 			kv_a = tokenize(aliases[i], "=");
 			if (_strcmp(kv[0], kv_a[0]) == 0)
@@ -134,10 +171,9 @@ int bi_alias(char **args)
 			}
 			_freeTokenized(kv_a);
 		}
-		
+		_freeTokenized(kv);
 		if (set)
 			continue;
-
 		aliases_cpy = malloc((i + 2) * sizeof(char *));
 		for (i = 0; aliases && aliases[i]; i++)
 			aliases_cpy[i] = _strdup(aliases[i]);

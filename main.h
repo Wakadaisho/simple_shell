@@ -31,7 +31,7 @@ typedef struct built_in
  *
  * Return: pointer to string input
  */
-char *getInput(int code);
+char *getInput(int mode);
 
 /**
  * tokenize - split a string into an array of strings
@@ -56,7 +56,7 @@ void executeCommand(char **args);
 
 /**
  * accessErrorCode - get or set error code
- * 
+ *
  * @code: error code to set
  * @mode:	1 - set code
  * Return: error code set or requested
@@ -347,14 +347,14 @@ void execBuiltin(char **args);
 /**
  * _aliases - get/set aliases from anywhere, statically
  *
- * @env:	environment variables to store, NULL to reuse stored
- * @mode	-1 - initial seed (no free)
- *		0 - returns environ (ignores env)
- *		1 - sets environ, then returns it
- *		2 - free environ then quit (ignores env)
+ * @args:	alias to store, NULL to reuse stored
+ * @mode:	-1 - initial seed (no free)
+ *		0 - returns aliases (ignores args)
+ *		1 - sets aliases, then returns it
+ *		2 - free aliases then quit (ignores env)
  *
- * Return:	pointer to environment variable strings
- *		NULL if environment not previously given
+ * Return:	pointer to aliases strings
+ *		NULL if args not previously given
  */
 char **_aliases(char **args, int mode);
 
@@ -367,5 +367,82 @@ char **_aliases(char **args, int mode);
  *		-1 - fail
  */
 int bi_alias(char **args);
+
+/**
+ * _getalias - get the value of an alias
+ *
+ * @name: alias to search for
+ *
+ * Return:	pointer to alias string
+ *		NULL if not found
+ */
+char *_getalias(char *name);
+
+/**
+ * tokenizeCommand - separate a command based on logical operators
+ *
+ * @s: command string to tokenize
+ *
+ * Return: pointer to two lists of commands and logical operators
+ */
+char ***tokenizeCommand(char *s);
+
+/**
+ * cleanMemory - free in use memory, such as statically allocated memory
+ *
+ * Return: void
+ */
+void cleanMemory(void);
+
+/**
+ * _accesscmds - return commands and logical operators tokenized
+ *
+ * @args:	two lists of commands and logical operators
+ * @mode:	0 - returns cmds (ignores args)
+ *		1 - sets cmds, then returns it
+ *		2 - free cmds then quit (ignores env)
+ *
+ * Return: pointer to lists of command and logical operators
+ */
+char ***_accesscmds(char ***args, int mode);
+
+/**
+ * parseVariables - go through tokens and replace environment variables
+ *
+ * @tokens: list of strings to replace if possible
+ *
+ * Return: void
+ */
+void parseVariables(char **tokens);
+
+/**
+ * continueChain - determine whether to continue executing
+ *			a chained command
+ * @op: logical operator or ';'
+ * @errorCode: last error code
+ *
+ * Return:	1 for true
+ *		0 for false
+ */
+int continueChain(char *op, int errorCode);
+
+/**
+ * execScript - execute commands in a file line by line
+ *
+ * @argc: number of arguments passed to main
+ * @argv: arguments passed to main
+ *
+ * Return: void
+ */
+void execScript(int argc, char **argv);
+
+/**
+ * _readfile - open a file and read in the contents to memory
+ *
+ * @filename: name of file to read content from
+ *
+ * Return: pointer to strings list
+ */
+char **_readfile(char *filename);
 
 #endif /* _MAIN_H_ */

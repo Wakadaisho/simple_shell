@@ -16,6 +16,9 @@ int main(int argc, char **argv, char **env)
 	_environ(env, SEED);
 	_aliases(NULL, SEED);
 
+	if (argc >= 2)
+		execScript(argc, argv);
+
 	if (!isatty(fileno(stdin)))
 	{
 		repl(argc, argv);

@@ -11,17 +11,11 @@
 int bi_exit(char **args)
 {
 	int ret = 0;
-	char **cd_free = malloc(sizeof(char *));
-
-	cd_free[0] = NULL;
 
 	if (args[1])
 		ret = _atoi(args[1]);
-	getInput(FREE);
 	_freeTokenized(args);
-	_environ(NULL, FREE);
-	bi_cd(cd_free);
-	free(cd_free);
+	cleanMemory();
 	exit(ret);
 }
 
@@ -37,7 +31,7 @@ int bi_cd(char **args)
 {
 	int size = 255, ret;
 	static int firstRun = 1;
-	char *cwd;
+	char *cwd, *home;
 	static char *pwd;
 
 	cwd = malloc(size * sizeof(char));
@@ -54,7 +48,9 @@ int bi_cd(char **args)
 	}
 	if (args[1] == NULL)
 	{
-		ret = chdir(_getenv("HOME"));
+		home = _getenv("HOME");
+		ret = chdir(home);
+		free(home);
 		if (pwd)
 			free(pwd);
 		pwd = cwd;
@@ -126,7 +122,7 @@ int bi_unsetenv(char **args)
 	if (args[1] == NULL)
 		return (-1);
 
-	while(env[i++])
+	while (env[i++])
 		continue;
 
 	env_cpy = malloc(i * sizeof(char *));

@@ -5,7 +5,7 @@
  * _environ - get environment variables from anywhere, statically
  *
  * @env:	environment variables to store, NULL to reuse stored
- * @mode	-1 - initial seed (no free)
+ * @mode:	-1 - initial seed (no free)
  *		0 - returns environ (ignores env)
  *		1 - sets environ, then returns it
  *		2 - free environ then quit (ignores env)
@@ -28,7 +28,7 @@ char **_environ(char **env, int mode)
 	{
 		return (environ);
 	}
-	
+
 	if (env)
 	{
 		while (env[len])
@@ -39,7 +39,7 @@ char **_environ(char **env, int mode)
 		for (i = 0; i < len; i++)
 			environ[i] = _strdup(env[i]);
 		environ[i] = NULL;
-		if (mode != SEED )
+		if (mode != SEED)
 			_freeTokenized(env);
 	}
 	return (environ);
@@ -60,6 +60,9 @@ char *_getenv(char *name)
 	char *key, *value;
 	char *ret, *str, *p;
 
+	if (*name == '$')
+		name++;
+
 	while (env[i])
 	{
 		p = str = _strdup(env[i++]);
@@ -75,7 +78,6 @@ char *_getenv(char *name)
 		free(key);
 		free(value);
 	}
-	_freeTokenized(env);
 	return (NULL);
 }
 
@@ -90,7 +92,7 @@ char *_getenv(char *name)
  */
 char *_setenv(char *name, char *value)
 {
-	char **args = malloc(3 * sizeof(char *));
+	char **args = malloc(4 * sizeof(char *));
 	char *val;
 
 	if (name == NULL)
@@ -98,6 +100,7 @@ char *_setenv(char *name, char *value)
 
 	args[1] = _strdup(name);
 	args[2] = NULL;
+	args[3] = NULL;
 
 	if (value == NULL)
 	{
@@ -108,7 +111,7 @@ char *_setenv(char *name, char *value)
 	}
 
 	args[0] = _strdup("setenv");
-	val = value == NULL ? _strdup("") : _strdup(value);
+	args[2] = value == NULL ? _strdup("") : _strdup(value);
 	bi_setenv(args);
 	_freeTokenized(args);
 
@@ -136,7 +139,7 @@ char *getCmdPath(char *cmd)
 	if (cmd == NULL || *cmd == '\0')
 		return (NULL);
 
-	if (_strcontains(cmd, "/") != -1)
+	if (_strcontains(cmd, "./") == 0)
 	{
 		if (stat(cmd, &st) == 0)
 			return (_strdup(cmd));

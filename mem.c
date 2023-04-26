@@ -95,3 +95,22 @@ int _freeTokenized(char **arr)
 
 	return (1);
 }
+
+/**
+ * cleanMemory - free in use memory, such as statically allocated memory
+ *
+ * Return: void
+ */
+void cleanMemory(void)
+{
+	char **cd_free = malloc(sizeof(char *));
+
+	cd_free[0] = NULL;
+	getInput(FREE);
+	_environ(NULL, FREE);
+	_aliases(NULL, FREE);
+	_accesscmds(NULL, FREE);
+	bi_cd(cd_free);
+	free(cd_free);
+	execScript(0, NULL);
+}
