@@ -48,7 +48,7 @@ char *getInput(int mode)
 		perror("read error");
 		exit(1);
 	}
-	line = realloc(line, len + 1);
+	line = _realloc(line, len, len + 1);
 	line[len] = '\0';
 	return (line);
 }
