@@ -71,7 +71,7 @@ void executeCommand(char **args)
 	proc = fork();
 	if (proc == 0)
 	{
-		execve(cmd, args, NULL);
+		execve(cmd, args, _environ(NULL, READ));
 	}
 	else if (proc > 0)
 	{
