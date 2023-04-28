@@ -24,9 +24,12 @@ char *getInput(void)
 			return (NULL);
 		}
 		if (_strcontains(line, "\n"))
+		{
+			total += bytes;
 			break;
+		}
 	}
-	if (total == 0)		/* read EOF*/
+	if (total == 0)		/*read EOF*/
 	{
 		write(STDOUT_FILENO, "\n", 1);
 		cleanMemory();

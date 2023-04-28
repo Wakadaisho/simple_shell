@@ -39,7 +39,7 @@ char **cmdOrAlias(char *cmd)
  */
 void execScript(char **argv)
 {
-	char **tokens = NULL, ***cmds = NULL, *tmp, *file = NULL;
+	char **tokens = NULL, ***cmds = NULL, *tmp;
 	char **lines = NULL;
 	int ec = 0, i = 0, j = 0, k = 0;
 
