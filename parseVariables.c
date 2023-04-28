@@ -9,35 +9,31 @@
  */
 void parseVariables(char **tokens)
 {
-	int i = 0;
-	char *parsed = NULL;
+	int i = 0, j = 0;
+	char *parsed = NULL, *sub = NULL, *rep = NULL;
+	char **environ = _environ(NULL, READ), **env = NULL;
 
 	for (i = 0; tokens[i]; i++)
 	{
-		if (tokens[i][0] != '$')
-			continue;
-		if (_strcmp(tokens[i], "$$") == 0)
+		for (j = 0; environ[j]; j++)
 		{
-			parsed = _itoa(getpid());
+			env = tokenize(environ[j], "=");
+			sub = _strjoin("$", env[0], NULL);
+			parsed = _strsubstitute(tokens[i], sub, env[1]);
 			free(tokens[i]);
 			tokens[i] = parsed;
-			parsed = NULL;
-			continue;
+			free(sub);
+			_freeTokenized(env);
 		}
-		if (_strcmp(tokens[i], "$?") == 0)
-		{
-			parsed = _itoa(accessErrorCode(0, READ));
-			free(tokens[i]);
-			tokens[i] = parsed;
-			parsed = NULL;
-			continue;
-		}
-		parsed = _getenv(tokens[i]);
-		if (parsed)
-		{
-			free(tokens[i]);
-			tokens[i] = parsed;
-			parsed = NULL;
-		}
+		rep = _itoa(getpid());
+		parsed = _strsubstitute(tokens[i], "$$", rep);
+		free(tokens[i]);
+		tokens[i] = parsed;
+		free(rep);
+		rep = _itoa(accessErrorCode(0, READ));
+		parsed = _strsubstitute(tokens[i], "$?", rep);
+		free(tokens[i]);
+		tokens[i] = parsed;
+		free(rep);
 	}
 }

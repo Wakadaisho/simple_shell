@@ -8,7 +8,7 @@
  * @str: keep track of last position in string
  *
  * Return: single string token
- */
+*/
 char *getQuotedString(char *token, char *delims, char **str)
 {
 	char *_t = NULL;
@@ -157,7 +157,7 @@ char ***tokenizeCommand(char *s)
 	char **ops = NULL, **t = tokenize(s, " \r\t");
 	char ***ret = malloc(2 * sizeof(char **));
 
-	for (op = 0, i = 0; t[i]; i++, op ^= op)
+	for (op = 0, i = 0; t && t[i]; i++, op ^= op)
 	{
 		op += _strcontains(t[i], "&&") != -1;
 		op += _strcontains(t[i], "||") != -1;
@@ -182,7 +182,7 @@ char ***tokenizeCommand(char *s)
 			free(cmd);
 		cmd = tmp;
 	}
-	for (; cmds_len >= cmds_cap - 1; cmds_cap *= 2)
+	for (; t && cmds_len >= cmds_cap - 1; cmds_cap *= 2)
 		cmds = _reallocp(cmds, cmds_len, cmds_cap * 2);
 	cmds[cmds_len++] = cmd;
 	cmds[cmds_len] = NULL;

@@ -60,9 +60,9 @@ char *_getenv(char *name)
 	char *key, *value;
 	char *ret, *str, *p;
 
-	if (*name == '$')
-		name++;
-
+	if (*name != '$')
+		return (NULL);
+	name++;
 	while (env[i])
 	{
 		p = str = _strdup(env[i++]);
@@ -133,8 +133,6 @@ char *getCmdPath(char *cmd)
 	char *location = NULL;
 	struct stat st;
 
-	accessErrorCode(0, WRITE);
-
 	if (cmd == NULL || *cmd == '\0')
 		return (NULL);
 
@@ -146,7 +144,7 @@ char *getCmdPath(char *cmd)
 		return (NULL);
 	}
 
-	path = _getenv("PATH");
+	path = _getenv("$PATH");
 	paths  = tokenize(path, ":");
 
 	while (paths[i])

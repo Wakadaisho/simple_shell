@@ -48,7 +48,7 @@ int bi_cd(char **args)
 	}
 	if (args[1] == NULL)
 	{
-		home = _getenv("HOME");
+		home = _getenv("$HOME");
 		ret = chdir(home);
 		free(home);
 		if (pwd)

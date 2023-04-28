@@ -79,7 +79,7 @@ void executeCommand(char **args)
 	}
 	else
 	{
-		accessErrorCode(127, WRITE);
+	accessErrorCode(127, WRITE);
 		return;
 	}
 	free(cmd);
@@ -98,17 +98,17 @@ void executeCommand(char **args)
  */
 void repl(char **argv)
 {
-	char *cmd = NULL, *alias = NULL, *tmp = NULL;
-	char **tokens =  NULL;
-	char ***cmds = NULL;
+	char *cmd, *alias = NULL, *tmp, **tokens = NULL, ***cmds = NULL;
 	int errorCode = 0, i = 0, k = 0;
 
-	/*Get user input*/
-	cmd = getInput(READ);
-	filterComment(cmd, "#");
-	if (_strlen(cmd) == 0)
+	cmd = getInput();
+	if (cmd == NULL)
 		return;
-	cmds = _accesscmds(tokenizeCommand(cmd), WRITE);
+	filterComment(cmd, "#");
+	tmp = _strsubstitute(cmd, "\n", " ; ");
+	free(cmd);
+	cmds = _accesscmds(tokenizeCommand(tmp), WRITE);
+	free(tmp);
 	for (i = 0; cmds[0][i]; i++)
 	{
 		alias = _getalias(cmds[0][i]);

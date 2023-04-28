@@ -5,51 +5,38 @@
 /**
  * getInput - get string input from the user
  *
- * @mode: 2 - Free memory
- *
  * Return: pointer to string input
  */
-char *getInput(int mode)
+char *getInput(void)
 {
-	char buf[SIZE];
-	int len = 0, capacity = SIZE, bytes, i;
-	static char *line;
+	char buf[SIZE] = {'\0'}, *tmp = NULL, *line = NULL;
+	int bytes, total = 0;
 
-	if (mode == FREE)
+	for (; (bytes = read(STDIN_FILENO, buf, SIZE)) > 0; total += bytes)
 	{
+		tmp = _strjoin(line, buf, NULL);
 		if (line)
 			free(line);
-		return (NULL);
-	}
-	if (line)
-		free(line);
-	line = malloc(SIZE);
-	while ((bytes = read(STDIN_FILENO, buf, SIZE)) > 0)
-	{
-		for (i = 0; i < bytes; i++)
+		line = tmp;
+		if (bytes == 1 && _strcontains(line, "\n") == 0)	   /*Enter key*/
 		{
-			if (buf[i] == '\n')
-			{
-				line = _realloc(line, len, len + 1);
-				line[len] = '\0';
-				return (line);
-			}
-			for (; len >= capacity; capacity *= 2)
-				line = _realloc(line, len, capacity * 2);
-			line[len++] = buf[i];
+			free(line);
+			return (NULL);
 		}
+		if (_strcontains(line, "\n"))
+			break;
 	}
-	if (bytes == 0)		/* read EOF*/
+	if (total == 0)		/* read EOF*/
 	{
+		write(STDOUT_FILENO, "\n", 1);
 		cleanMemory();
 		exit(0);
 	}
 	if (bytes < 0)
 		exit(1);
-	line = _realloc(line, len, len + 1);
-	line[len] = '\0';
 	return (line);
 }
+
 
 /**
  * _accesscmds - return commands and logical operators tokenized
@@ -100,9 +87,9 @@ char ***_accesscmds(char ***args, int mode)
  */
 char **_readfile(char *filename)
 {
-	int line_len = 0, lines_len = 0, line_cap = 10, lines_cap = 10, bytes;
+	int line_len = 0, lines_len = 0, line_cap = 10, lines_cap = 10, bytes, i;
 	char *c = malloc(sizeof(char));
-	char *line = NULL, **lines = malloc(lines_cap * sizeof(char *));
+	char *line = NULL, **lines;
 	int fd = open(filename, O_RDONLY);
 
 	if (fd == -1)
@@ -111,7 +98,8 @@ char **_readfile(char *filename)
 		cleanMemory();
 		exit(1);
 	}
-
+	for (lines = malloc(lines_cap * sizeof(char *)), i = 0; i < lines_cap; i++)
+		lines[i] = NULL;
 	while ((bytes = read(fd, c, 1)) > 0)
 	{
 		if (line == NULL)

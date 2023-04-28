@@ -29,6 +29,7 @@ char **cmdOrAlias(char *cmd)
 
 	return (tokens);
 }
+
 /**
  * execScript - execute commands in a file line by line
  *
@@ -38,18 +39,12 @@ char **cmdOrAlias(char *cmd)
  */
 void execScript(char **argv)
 {
-	char **tokens = NULL, ***cmds = NULL, *tmp;
-	static char **lines;
+	char **tokens = NULL, ***cmds = NULL, *tmp, *file = NULL;
+	char **lines = NULL;
 	int ec = 0, i = 0, j = 0, k = 0;
 
-	if (argv == NULL)
-	{
-		if (lines)
-			_freeTokenized(lines);
-		return;
-	}
 	lines = _readfile(argv[1]);
-	for (j = 0; lines[j]; j++)
+	for (j = 0; lines && lines[j]; j++)
 	{
 		filterComment(lines[j], "#");
 		if (_strlen(lines[j]) == 0)
@@ -74,6 +69,8 @@ void execScript(char **argv)
 					break;
 		}
 	}
+	if (lines)
+		_freeTokenized(lines);
 	cleanMemory();
 	exit(0);
 }

@@ -22,15 +22,14 @@ int main(int argc, char **argv, char **env)
 	if (!isatty(fileno(stdin)))
 	{
 		repl(argv);
-		getInput(FREE);
-		_environ(NULL, FREE);
+		cleanMemory();
 		return (0);
 	}
 
 	while (1)
 	{
 		/*Display prompt*/
-		write(STDOUT_FILENO, "($) ", 4);
+		write(STDOUT_FILENO, "$ ", 2);
 
 		repl(argv);
 	}

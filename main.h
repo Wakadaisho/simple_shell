@@ -27,11 +27,9 @@ typedef struct built_in
 /**
  * getInput - get string input from the user
  *
- * @mode: 2 - Free memory
- *
  * Return: pointer to string input
  */
-char *getInput(int mode);
+char *getInput(void);
 
 /**
  * tokenize - split a string into an array of strings
